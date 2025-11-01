@@ -139,14 +139,24 @@ EventSchema.pre('save', function (next) {
       if (!dateParts) {
         return next(new Error('Date must be in YYYY-MM-DD format'));
       }
-      const parsedDate = new Date(Date.UTC(
-        parseInt(dateParts[1]), 
-        parseInt(dateParts[2]) - 1, 
-        parseInt(dateParts[3])
-      ));
+      const year = parseInt(dateParts[1]);
+      const month = parseInt(dateParts[2]) - 1;
+      const day = parseInt(dateParts[3]);
+      
+      const parsedDate = new Date(Date.UTC(year, month, day));
       if (isNaN(parsedDate.getTime())) {
         return next(new Error('Invalid date format'));
       }
+      
+      // Validate that the date components match (catch rollovers like 2024-02-30)
+      if (
+        parsedDate.getUTCFullYear() !== year ||
+        parsedDate.getUTCMonth() !== month ||
+        parsedDate.getUTCDate() !== day
+      ) {
+        return next(new Error('Invalid calendar date'));
+      }
+      
       // Store as ISO date string
       event.date = parsedDate.toISOString().split('T')[0];
     } catch (error) {
