@@ -115,12 +115,20 @@ EventSchema.pre('save', function (next) {
 
   // Generate slug only if title is modified or document is new
   if (event.isModified('title')) {
-    event.slug = event.title
+    const generatedSlug = event.title
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '') // Remove special characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+
+    if (!generatedSlug) {
+      return next(
+        new Error('Title must include alphanumeric characters to generate a slug')
+      );
+    }
+
+    event.slug = generatedSlug;
   }
 
   // Normalize date to ISO format (YYYY-MM-DD) if modified
