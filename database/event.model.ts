@@ -134,7 +134,16 @@ EventSchema.pre('save', function (next) {
   // Normalize date to ISO format (YYYY-MM-DD) if modified
   if (event.isModified('date')) {
     try {
-      const parsedDate = new Date(event.date);
+      // Parse as UTC midnight to avoid timezone shifts
+      const dateParts = event.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!dateParts) {
+        return next(new Error('Date must be in YYYY-MM-DD format'));
+      }
+      const parsedDate = new Date(Date.UTC(
+        parseInt(dateParts[1]), 
+        parseInt(dateParts[2]) - 1, 
+        parseInt(dateParts[3])
+      ));
       if (isNaN(parsedDate.getTime())) {
         return next(new Error('Invalid date format'));
       }
