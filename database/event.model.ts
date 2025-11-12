@@ -104,7 +104,7 @@ const EventSchema = new Schema<IEvent>(
 );
 
 // Index for faster slug-based queries
-EventSchema.index({ slug: 1 });
+// EventSchema.index({ slug: 1 });
 
 /**
  * Pre-save hook to generate slug from title, normalize date to ISO format,
