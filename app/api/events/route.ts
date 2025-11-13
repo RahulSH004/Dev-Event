@@ -50,3 +50,5 @@ export async function GET(){
         return NextResponse.json({message: 'Failed to fetch events', error: e }, {status: 500});
     }
 }
+
+// a route that accepts a slug as an input and return the event destails
