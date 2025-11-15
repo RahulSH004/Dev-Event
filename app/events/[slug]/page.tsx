@@ -72,8 +72,8 @@ const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
           </div>
 
           {/* Event Overview */}
-          <aside className="flex-1 w-full p-4 border-l border-gray-700">
-            <div className="bg-dark-100 border-dark-200 card-shadow flex w-full flex-col gap-6 rounded-[10px] border px-5 py-6">
+          <aside className="booking">
+            <div className="signup-card">
               <h2>Book Your Seat</h2>
               {bookings > 0 ? (
                 <p className="text-sm">

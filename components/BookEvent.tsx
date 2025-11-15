@@ -14,7 +14,7 @@ const BookEvent = () => {
    }
 
   return (
-    <div>
+    <div id='book-event'>
         {submitted ? (
             <p className='text-sm'>Thank you for booking!</p>
         ) : (
