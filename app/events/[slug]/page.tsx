@@ -40,7 +40,6 @@ const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
   const { event: { description, date, time, location, image, mode, agenda, audience, overview, tags, organizer }} = await request.json();
   const bookings = 10;
   const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
-  console.log(similarEvents);
 
   if(!description) return notFound();
   return (
