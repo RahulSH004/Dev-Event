@@ -4,6 +4,7 @@ import { events } from '@/lib/constants';
 import EventCard from '@/components/EventCard';
 import { IEvent } from '@/database';
 import { cacheLife } from 'next/cache';
+import { getAllEvents } from '@/lib/actions/event.actions';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -11,15 +12,15 @@ const page = async() => {
   'use cache';
   cacheLife('hours')
   
-  const response = await fetch(`${BASE_URL}/api/events`, {
-    next: { revalidate: 3600 }
-  });
+  // const response = await fetch(`${BASE_URL}/api/events`, {
+  //   next: { revalidate: 3600 }
+  // });
   
-  if (!response.ok) {
-    throw new Error('Failed to fetch events');
-  }
+  // if (!response.ok) {
+  //   throw new Error('Failed to fetch events');
+  // }
   
-  const {events} = await response.json();
+  const {events} = await getAllEvents();
 
   return (
     <section>
