@@ -5,6 +5,7 @@ import { IEvent } from "@/database";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import EventCard from "@/components/EventCard";
 import { cacheLife } from "next/cache";
+import { Suspense } from "react";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -36,16 +37,32 @@ const EventTags = ({tags}: {tags: string[]}) => (
 
 
 const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
+  const {slug} = await params;
+  
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <EventContent slug={slug} />
+    </Suspense>
+  );
+}
+
+const EventContent = async ({ slug }: { slug: string }) => {
   'use cache'
   cacheLife('hours')
-  const {slug} =   await params;
+  
   const request = await fetch(`${BASE_URL}/api/events/${slug}`);
+  
+  if (!request.ok) {
+    return notFound();
+  }
+  
   const { event } = await request.json();
   const { description, date, time, location, image, mode, agenda, audience, overview, tags, organizer } = event;
   const bookings = 10;
   const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
 
   if(!description) return notFound();
+  
   return (
     <section id="event">
       <div className="header">
@@ -54,7 +71,6 @@ const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
       </div>
 
         <div className="details">
-          {/* Event Image */}
           <div className="content">
             <Image src={image} alt='Event Banner' width={800} height={800} className="banner" />
 
@@ -81,7 +97,6 @@ const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
             
           </div>
 
-          {/* Event Overview */}
           <aside className="booking">
             <div className="signup-card">
               <h2>Book Your Seat</h2>
@@ -105,8 +120,7 @@ const EventDetailPage = async( {params}: {params: Promise<{slug: string}>}) => {
           </div>
         </div>
     </section>
-    
-  )
+  );
 }
 
 export default EventDetailPage
