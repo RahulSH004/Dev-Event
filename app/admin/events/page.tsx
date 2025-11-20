@@ -1,9 +1,36 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { getAllEvents } from '@/lib/actions/event.actions';
 import EventList from '@/components/EventList';
 import Link from 'next/link';
 
-export default async function AdminEventsPage() {
-  const events = await getAllEvents();
+export default function AdminEventsPage() {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const eventsData = await getAllEvents();
+        setEvents(eventsData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading events:', error);
+        setLoading(false);
+      }
+    }
+
+    loadEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="admin-section">
+        <p>Loading events...</p>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-section">

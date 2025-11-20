@@ -1,45 +1,105 @@
-import { getEventById } from '@/lib/actions/event.actions';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import EventForm from '@/components/EventForm';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { getEventById } from '@/lib/actions/event.actions';
+import { authClient } from '@/lib/auth-client';
 
-export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const event = await getEventById(id);
+interface Event {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  overview: string;
+  image: string;
+  venue: string;
+  location: string;
+  date: string;
+  time: string;
+  mode: string;
+  audience: string;
+  agenda: string[];
+  organizer: string;
+  tags: string[];
+  createdBy: string;
+}
 
-  if (!event) {
-    notFound();
-  }
+export default function EditEventPage({ params }: { params: { id: string } }) {
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Check if user is authenticated and authorized
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
+  useEffect(() => {
+    async function loadEventAndCheckAuth() {
+      try {
+        // Check authentication
+        const session = await authClient.getSession();
+        
+        if (!session?.user) {
+          router.push('/auth/signin');
+          return;
+        }
 
-  if (!session?.user) {
+        // Load event
+        const eventData = await getEventById(params.id);
+        
+        if (!eventData) {
+          setError('Event not found');
+          setLoading(false);
+          return;
+        }
+
+        // Check authorization
+        if (eventData.createdBy !== session.user.id) {
+          setError('unauthorized');
+          setLoading(false);
+          return;
+        }
+
+        setEvent(eventData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading event:', err);
+        setError('Failed to load event');
+        setLoading(false);
+      }
+    }
+
+    loadEventAndCheckAuth();
+  }, [params.id, router]);
+
+  if (loading) {
     return (
       <section className="admin-section">
-        <div className="empty-state">
-          <h2>Authentication Required</h2>
-          <p>You must be signed in to edit events.</p>
-          <Link href="/auth/signin" className="btn-primary">
-            Sign In
-          </Link>
-        </div>
+        <p>Loading...</p>
       </section>
     );
   }
 
-  // Check if user is the creator of this event
-  if (event.createdBy !== session.user.id) {
+  if (error === 'unauthorized') {
     return (
       <section className="admin-section">
         <div className="empty-state">
           <h2>Unauthorized Access</h2>
           <p>You can only edit events that you created.</p>
           <Link href="/" className="btn-primary">
+            Back to Events
+          </Link>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <section className="admin-section">
+        <div className="empty-state">
+          <h2>Event Not Found</h2>
+          <p>{error || 'The event you are looking for does not exist.'}</p>
+          <Link href="/admin/events" className="btn-primary">
             Back to Events
           </Link>
         </div>
