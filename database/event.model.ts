@@ -16,6 +16,7 @@ export interface IEvent extends Document {
   agenda: string[];
   organizer: string;
   tags: string[];
+  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,6 +97,11 @@ const EventSchema = new Schema<IEvent>(
         validator: (v: string[]) => Array.isArray(v) && v.length > 0,
         message: 'Tags must contain at least one item',
       },
+    },
+    createdBy: {
+      type: String,
+      required: [true, 'Creator ID is required'],
+      trim: true,
     },
   },
   {

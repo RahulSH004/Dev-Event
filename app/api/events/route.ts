@@ -1,4 +1,4 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from 'cloudinary';
 
 import connectDB from "@/lib/mongodb";
@@ -15,20 +15,20 @@ export async function POST(req: NextRequest) {
         try {
             event = Object.fromEntries(formData.entries());
         } catch (e) {
-            return NextResponse.json({ message: 'Invalid JSON data format'}, { status: 400 })
+            return NextResponse.json({ message: 'Invalid JSON data format' }, { status: 400 })
         }
 
         const file = formData.get('image') as File;
 
-        if(!file) return NextResponse.json({ message: 'Image file is required'}, { status: 400 })
+        if (!file) return NextResponse.json({ message: 'Image file is required' }, { status: 400 })
 
         const tagsData = formData.get('tags');
         const agendaData = formData.get('agenda');
-        
+
         if (!tagsData || !agendaData) {
             return NextResponse.json({ message: 'Tags and agenda are required' }, { status: 400 });
         }
-        
+
         let tags, agenda;
         try {
             tags = JSON.parse(tagsData as string);
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
         const uploadResult = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream({ resource_type: 'image', folder: 'DevEvent' }, (error, results) => {
-                if(error) return reject(error);
+                if (error) return reject(error);
 
                 resolve(results);
             }).end(buffer);
@@ -59,18 +59,78 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Event created successfully', event: createdEvent }, { status: 201 });
     } catch (e) {
         console.error(e);
-        return NextResponse.json({ message: 'Event Creation Failed', error: e instanceof Error ? e.message : 'Unknown'}, { status: 500 })
+        return NextResponse.json({ message: 'Event Creation Failed', error: e instanceof Error ? e.message : 'Unknown' }, { status: 500 })
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         await connectDB();
 
-        const events = await Event.find().sort({ createdAt: -1 });
+        // Extract query parameters
+        const { searchParams } = new URL(req.url);
+        const q = searchParams.get('q') || '';
+        const date = searchParams.get('date') || '';
+        const mode = searchParams.get('mode') || '';
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '12');
 
-        return NextResponse.json({ message: 'Events fetched successfully', events }, { status: 200 });
+        // Build query object
+        const query: any = {};
+
+        // Search query - searches across multiple fields
+        if (q) {
+            query.$or = [
+                { title: { $regex: q, $options: 'i' } },
+                { description: { $regex: q, $options: 'i' } },
+                { location: { $regex: q, $options: 'i' } },
+                { venue: { $regex: q, $options: 'i' } },
+                { organizer: { $regex: q, $options: 'i' } },
+                { tags: { $in: [new RegExp(q, 'i')] } },
+            ];
+        }
+
+        // Date filter
+        if (date) {
+            query.date = date;
+        }
+
+        // Mode filter
+        if (mode && ['online', 'offline', 'hybrid'].includes(mode)) {
+            query.mode = mode;
+        }
+
+        // Calculate pagination
+        const skip = (page - 1) * limit;
+
+        // Execute query with pagination
+        const [events, total] = await Promise.all([
+            Event.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Event.countDocuments(query)
+        ]);
+
+        // Calculate total pages
+        const totalPages = Math.ceil(total / limit);
+
+        return NextResponse.json({
+            message: 'Events fetched successfully',
+            events,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages
+            }
+        }, { status: 200 });
     } catch (e) {
-        return NextResponse.json({ message: 'Event fetching failed', error: e }, { status: 500 });
+        console.error('Error fetching events:', e);
+        return NextResponse.json({
+            message: 'Event fetching failed',
+            error: e instanceof Error ? e.message : 'Unknown error'
+        }, { status: 500 });
     }
 }
