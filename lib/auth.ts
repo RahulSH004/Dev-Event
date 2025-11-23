@@ -8,15 +8,15 @@ connectDB();
 
 export const auth = betterAuth({
     database: mongodbAdapter(mongoose.connection),
-    baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,
     },
     socialProviders: {
         google: {
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            clientId: process.env.AUTH_GOOGLE_ID as string,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
         },
     },
     session: {
@@ -26,7 +26,6 @@ export const auth = betterAuth({
         },
     },
     trustedOrigins: [
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
         "http://localhost:3000",
         "https://dev-event-phi.vercel.app"
     ],
