@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { X } from 'lucide-react';
 import { signOut } from '@/lib/auth-client';
@@ -13,6 +15,11 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, session }: SidebarProps) {
   const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -21,11 +28,13 @@ export default function Sidebar({ isOpen, onClose, session }: SidebarProps) {
     onClose();
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/30 z-[90] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/80 z-[9998] transition-opacity duration-300 ${
           isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
         onClick={onClose}
@@ -33,7 +42,7 @@ export default function Sidebar({ isOpen, onClose, session }: SidebarProps) {
 
       {/* Sidebar Panel */}
       <div
-        className={`fixed top-0 left-0 h-full w-[280px] bg-dark-100 border-r border-border-dark z-[100] transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-[280px] bg-[#182830] border-r border-white/10 z-[9999] transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -47,7 +56,7 @@ export default function Sidebar({ isOpen, onClose, session }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="flex flex-col p-5 gap-2 opacity-100">
+        <nav className="flex flex-col p-5 gap-2">
           <Link 
             href="/" 
             className="text-light-100 hover:text-primary hover:bg-white/5 px-4 py-3 rounded-lg text-lg transition-all font-medium" 
@@ -109,6 +118,7 @@ export default function Sidebar({ isOpen, onClose, session }: SidebarProps) {
           )}
         </nav>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
