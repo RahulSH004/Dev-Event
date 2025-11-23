@@ -1,6 +1,10 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import mongoose from "mongoose";
+import connectDB from "./mongodb";
+
+// Ensure database connection is established
+connectDB();
 
 export const auth = betterAuth({
     database: mongodbAdapter(mongoose.connection),
