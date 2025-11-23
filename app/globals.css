@@ -163,11 +163,11 @@
         }
 
         .nav-center {
-            @apply flex flex-row items-center gap-6 justify-center;
+            @apply flex flex-row items-center gap-4 justify-center flex-wrap max-md:hidden;
         }
 
         .nav-right {
-            @apply flex justify-end;
+            @apply flex justify-end items-center gap-3;
         }
     }
 

@@ -8,7 +8,7 @@ await connectDB();
 
 export const auth = betterAuth({
     database: mongodbAdapter(mongoose.connection.db!),
-    baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,
@@ -26,6 +26,7 @@ export const auth = betterAuth({
         },
     },
     trustedOrigins: [
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
         "http://localhost:3000",
         "https://dev-event-phi.vercel.app"
     ],

@@ -10,11 +10,22 @@ export async function middleware(request: NextRequest) {
 
   if (isAdminRoute || isDashboardRoute) {
     // Check for session cookie (production uses __Secure- prefix)
-    const sessionCookie =
+    // better-auth can use session_token or session_data cookies
+    const sessionToken =
       request.cookies.get('__Secure-better-auth.session_token') ||
       request.cookies.get('better-auth.session_token');
 
-    if (!sessionCookie) {
+    const sessionData =
+      request.cookies.get('__Secure-better-auth.session_data') ||
+      request.cookies.get('better-auth.session_data');
+
+    // Log for debugging (remove in production)
+    console.log('Checking auth for:', path);
+    console.log('Session token:', !!sessionToken);
+    console.log('Session data:', !!sessionData);
+    console.log('All cookies:', request.cookies.getAll().map(c => c.name));
+
+    if (!sessionToken && !sessionData) {
       return NextResponse.redirect(new URL('/auth/signin', request.url));
     }
   }
