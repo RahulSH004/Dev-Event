@@ -147,29 +147,7 @@
         }
     }
 
-    header {
-        @apply glass sticky top-0 z-50;
-
-        nav {
-            @apply flex justify-between items-center mx-auto container sm:px-10 px-5 py-4 md:grid md:grid-cols-3;
-        }
-
-        .logo {
-            @apply flex flex-row items-center gap-2;
-
-            p {
-                @apply text-xl font-bold italic max-sm:hidden;
-            }
-        }
-
-        .nav-center {
-            @apply flex flex-row items-center gap-4 justify-center flex-wrap max-md:hidden;
-        }
-
-        .nav-right {
-            @apply flex justify-end items-center gap-3;
-        }
-    }
+    /* Header styles moved to Navbar component */
 
     .events {
         @apply grid md:grid-cols-3 gap-10 sm:grid-cols-2 grid-cols-1;
