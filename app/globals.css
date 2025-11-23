@@ -151,7 +151,7 @@
         @apply glass sticky top-0 z-50;
 
         nav {
-            @apply grid grid-cols-3 items-center mx-auto container sm:px-10 px-5 py-4;
+            @apply flex justify-between items-center mx-auto container sm:px-10 px-5 py-4 md:grid md:grid-cols-3;
         }
 
         .logo {
@@ -310,10 +310,10 @@
     }
 
     .admin-header {
-        @apply flex flex-row justify-between items-start gap-4 max-sm:flex-col;
+        @apply flex flex-row justify-between items-start gap-4 max-sm:flex-col max-sm:items-stretch;
 
         h1 {
-            @apply text-4xl;
+            @apply text-4xl max-sm:text-3xl;
         }
     }
 
