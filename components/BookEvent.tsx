@@ -22,7 +22,12 @@ const BookEvent = ({eventId}: {eventId: string}) => {
        setMessage(null);
        
        try {
-           const result = await createBooking({ eventId, email: session.user.email });
+           const result = await createBooking({ 
+               eventId, 
+               email: session.user.email,
+               userId: session.user.id,
+               userName: session.user.name || session.user.email
+           });
            
            if (result.success) {
                setMessage({ type: 'success', text: result.message || 'Registration successful!' });

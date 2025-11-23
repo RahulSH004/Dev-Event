@@ -4,7 +4,10 @@ import Event from './event.model';
 // TypeScript interface for Booking document
 export interface IBooking extends Document {
   eventId: mongoose.Types.ObjectId;
+  userId?: string;
+  userName?: string;
   email: string;
+  status: 'confirmed' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +19,16 @@ const BookingSchema = new Schema<IBooking>(
       ref: 'Event',
       required: [true, 'Event ID is required'],
     },
+    userId: {
+      type: String,
+      trim: true,
+      // Optional field for authenticated users
+    },
+    userName: {
+      type: String,
+      trim: true,
+      // Optional field for display purposes
+    },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -26,6 +39,11 @@ const BookingSchema = new Schema<IBooking>(
         'Please provide a valid email address',
       ],
     },
+    status: {
+      type: String,
+      enum: ['confirmed', 'cancelled'],
+      default: 'confirmed',
+    },
   },
   {
     timestamps: true,
@@ -34,6 +52,10 @@ const BookingSchema = new Schema<IBooking>(
 
 // Index on eventId for faster lookups
 BookingSchema.index({ eventId: 1 });
+// Compound index for user bookings
+BookingSchema.index({ userId: 1, eventId: 1 });
+// Index on email for backward compatibility
+BookingSchema.index({ email: 1 });
 
 /**
  * Pre-save hook to verify that the referenced event exists in the database.

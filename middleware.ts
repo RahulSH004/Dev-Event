@@ -6,8 +6,9 @@ export async function middleware(request: NextRequest) {
 
   // Protected routes
   const isAdminRoute = path.startsWith('/admin');
+  const isDashboardRoute = path.startsWith('/dashboard');
 
-  if (isAdminRoute) {
+  if (isAdminRoute || isDashboardRoute) {
     // Check for session cookie
     const sessionCookie = request.cookies.get('better-auth.session_token');
 
@@ -20,5 +21,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/dashboard/:path*'],
 };

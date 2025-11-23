@@ -1,9 +1,14 @@
+'use client';
+
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import AuthButton from './AuthButton'
+import { useSession } from '@/lib/auth-client'
 
 const Navbar = () => {
+  const { data: session } = useSession();
+
   return (
     <header>
         <nav>
@@ -13,7 +18,13 @@ const Navbar = () => {
             <ul className='nav-center'>
                 <Link href="/">Home</Link>
                 <Link href="/events">Events</Link>
-                <Link href="/admin/events">Manage Events</Link>
+                {session && (
+                    <>
+                        <Link href="/dashboard">My Events</Link>
+                        <Link href="/admin/events">Manage Events</Link>
+                        <Link href="/admin/analytics">Analytics</Link>
+                    </>
+                )}
             </ul>
             <div className='nav-right'>
                 <AuthButton />

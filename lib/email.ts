@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 interface BookingConfirmationParams {
   email: string;
@@ -35,6 +36,11 @@ export async function sendBookingConfirmation({
     });
 
     const eventUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/events/${eventSlug}`;
+
+    if (!resend) {
+      console.warn('Resend API key not found. Email sending skipped.');
+      return { success: false, error: 'Resend API key missing' };
+    }
 
     const { data, error } = await resend.emails.send({
       from: 'Dev Events <onboarding@resend.dev>', // Use your verified domain
