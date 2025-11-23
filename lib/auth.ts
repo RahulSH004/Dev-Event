@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 import connectDB from "./mongodb";
 
 // Ensure database connection is established
-connectDB();
+await connectDB();
 
 export const auth = betterAuth({
-    database: mongodbAdapter(mongoose.connection),
+    database: mongodbAdapter(mongoose.connection.db!),
     baseURL: process.env.NEXT_PUBLIC_BASE_URL,
     emailAndPassword: {
         enabled: true,
